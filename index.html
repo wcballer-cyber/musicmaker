@@ -1,0 +1,1498 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>mus$icmaker</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>%F0%9F%8E%B9</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0b0d12;
+  --panel:#14171f;
+  --panel-2:#191d27;
+  --line:#232938;
+  --ink:#e8ecf4;
+  --dim:#8a93a8;
+  --accent:#c8ff00;
+  --accent-2:#4dc8ff;
+  --danger:#ff5c5c;
+
+  --kick:#ff5c8a;
+  --snare:#ffb84d;
+  --hh:#6ee7b7;
+  --clap:#a78bfa;
+  --bass:#38bdf8;
+  --lead:#c8ff00;
+}
+
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+body{
+  background:var(--bg);
+  background-image:
+    radial-gradient(circle at 12% 8%, rgba(200,255,0,0.06), transparent 38%),
+    radial-gradient(circle at 88% 92%, rgba(77,200,255,0.07), transparent 40%);
+  color:var(--ink);
+  font-family:'Space Grotesk',sans-serif;
+  min-height:100vh;
+}
+.mono{font-family:'IBM Plex Mono',monospace;}
+
+/* ---------- top bar ---------- */
+.topbar{
+  position:sticky;top:0;z-index:50;
+  background:rgba(11,13,18,0.85);
+  backdrop-filter:blur(10px);
+  border-bottom:1px solid var(--line);
+}
+.topbar-inner{
+  max-width:1180px;margin:0 auto;
+  padding:12px 20px;
+  display:flex;align-items:center;justify-content:space-between;
+  gap:16px;flex-wrap:wrap;
+}
+.brand{display:flex;align-items:center;gap:10px;}
+.brand-mark{
+  display:inline-flex;align-items:center;justify-content:center;
+  width:34px;height:34px;border-radius:9px;
+  background:var(--accent);color:#0b0d12;
+  font-weight:700;letter-spacing:1px;
+}
+.brand-name{font-weight:700;font-size:18px;letter-spacing:0.5px;}
+.tabs{display:flex;gap:6px;background:var(--panel);padding:4px;border:1px solid var(--line);border-radius:12px;}
+.tab-btn{
+  border:0;background:transparent;color:var(--dim);
+  font-family:inherit;font-size:14px;font-weight:600;
+  padding:8px 18px;border-radius:9px;cursor:pointer;transition:all .15s;
+}
+.tab-btn:hover{color:var(--ink);}
+.tab-btn.active{background:var(--accent);color:#0b0d12;}
+
+main{max-width:1180px;margin:0 auto;padding:28px 20px 80px;}
+.tab{display:none;}
+.tab.active{display:block;animation:fade .25s ease;}
+@keyframes fade{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:none;}}
+
+.panel{
+  background:var(--panel);
+  border:1px solid var(--line);
+  border-radius:16px;
+  padding:18px;
+}
+.grid-panel{margin-top:16px;}
+
+/* ---------- transport ---------- */
+.transport{
+  display:flex;align-items:center;gap:22px;flex-wrap:wrap;
+}
+.transport-group{display:flex;align-items:center;gap:10px;}
+.transport-group.grow{flex:1;justify-content:flex-end;}
+
+.btn{
+  border:1px solid var(--line);background:var(--panel-2);color:var(--ink);
+  font-family:inherit;font-size:14px;font-weight:600;
+  padding:10px 16px;border-radius:10px;cursor:pointer;transition:all .15s;
+}
+.btn:hover{border-color:var(--accent);}
+.btn.mini{padding:8px 12px;font-family:'IBM Plex Mono',monospace;font-size:12px;}
+.btn.small{padding:8px 12px;font-size:13px;}
+.btn.block{display:block;width:100%;}
+.btn.accent{background:var(--accent);border-color:var(--accent);color:#0b0d12;}
+.btn.accent:hover{filter:brightness(1.1);}
+.btn.danger{border-color:rgba(255,92,92,0.4);color:var(--danger);}
+.btn.play{background:var(--accent);border-color:var(--accent);color:#0b0d12;min-width:88px;}
+.btn.stop{min-width:88px;}
+.btn:disabled{opacity:0.45;cursor:not-allowed;}
+
+.bpm-label{font-size:12px;font-weight:600;color:var(--dim);letter-spacing:0.6px;text-transform:uppercase;}
+
+input[type=range]{
+  -webkit-appearance:none;appearance:none;
+  height:4px;border-radius:2px;background:#2b3242;outline:none;
+}
+input[type=range]::-webkit-slider-thumb{
+  -webkit-appearance:none;appearance:none;
+  width:15px;height:15px;border-radius:50%;
+  background:var(--accent);cursor:pointer;border:2px solid #0b0d12;
+}
+input[type=range]::-moz-range-thumb{
+  width:13px;height:13px;border-radius:50%;
+  background:var(--accent);cursor:pointer;border:2px solid #0b0d12;
+}
+#bpmSlider{width:170px;}
+
+select{
+  background:var(--panel-2);color:var(--ink);
+  border:1px solid var(--line);border-radius:8px;
+  font-family:'IBM Plex Mono',monospace;font-size:13px;
+  padding:7px 8px;outline:none;cursor:pointer;
+}
+select:focus{border-color:var(--accent);}
+
+/* ---------- grid ---------- */
+.grid-head{
+  display:flex;align-items:center;justify-content:space-between;
+  gap:12px;flex-wrap:wrap;margin-bottom:14px;
+}
+.panel-title{font-weight:700;font-size:16px;letter-spacing:0.4px;}
+.hint{font-size:12px;color:var(--dim);margin-left:10px;}
+.grid-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+.bars-sel{width:90px;}
+
+.grid-scroll{overflow-x:auto;padding-bottom:6px;}
+.colheader,.row{display:flex;align-items:center;}
+.rowlabel{
+  flex:0 0 190px;min-width:190px;
+  display:flex;align-items:center;gap:8px;
+  padding-right:14px;
+}
+.colheader .rowlabel{height:24px;}
+.row{padding:4px 0;}
+.rowlabel .iname{font-size:13px;font-weight:600;width:44px;}
+.rowlabel .mute-btn{
+  width:26px;height:26px;border-radius:7px;
+  border:1px solid var(--line);background:var(--panel-2);color:var(--dim);
+  font-family:'IBM Plex Mono',monospace;font-size:11px;cursor:pointer;line-height:1;
+}
+.rowlabel .mute-btn.on{background:var(--accent);color:#0b0d12;border-color:var(--accent);}
+.rowlabel input[type=range]{width:64px;}
+
+.steps{
+  display:grid;grid-template-columns:repeat(16,34px);gap:5px;
+}
+.cell{
+  width:34px;height:34px;border-radius:8px;
+  background:#1c2130;border:1px solid #2b3242;
+  cursor:pointer;transition:all .1s;padding:0;
+}
+.cell:hover{background:#262d40;}
+.cell.on{background:var(--ic,var(--accent));border-color:var(--ic,var(--accent));box-shadow:0 0 10px var(--ic,var(--accent));}
+.cell.on.strong{box-shadow:0 0 14px var(--ic,var(--accent));}
+.cell.playing{outline:2px solid #ffffff;outline-offset:-2px;}
+
+.colheader .steps div{
+  width:34px;height:24px;display:flex;align-items:center;justify-content:center;
+  font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--dim);
+}
+.colheader .steps div.bar{color:var(--accent);font-weight:500;}
+.colheader .steps div.playing{color:#fff;}
+
+/* per-instrument accent colors */
+.row[data-inst="kick"]{--ic:var(--kick);}
+.row[data-inst="snare"]{--ic:var(--snare);}
+.row[data-inst="hh"]{--ic:var(--hh);}
+.row[data-inst="clap"]{--ic:var(--clap);}
+.row[data-inst="bass"]{--ic:var(--bass);}
+.row[data-inst="lead"]{--ic:var(--lead);}
+.row.muted .iname{opacity:0.35;}
+.row.muted .cell{opacity:0.35;}
+
+/* ---------- lyrics ---------- */
+.lyrics-layout{
+  display:flex;gap:20px;
+  min-height:560px;
+  padding:0;overflow:hidden;
+}
+.songlist{
+  flex:0 0 240px;min-width:240px;
+  border-right:1px solid var(--line);
+  padding:18px;
+  display:flex;flex-direction:column;gap:12px;
+  background:var(--panel-2);
+}
+.song-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px;overflow-y:auto;flex:1;}
+.song-list li{
+  padding:9px 12px;border-radius:9px;cursor:pointer;
+  font-size:14px;color:var(--dim);
+  border:1px solid transparent;
+  display:flex;align-items:center;justify-content:space-between;gap:8px;
+}
+.song-list li:hover{background:#1d2330;color:var(--ink);}
+.song-list li.active{background:var(--accent);color:#0b0d12;font-weight:600;}
+.song-list .song-title-mini{
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.song-list .song-del{
+  border:0;background:transparent;color:inherit;cursor:pointer;
+  font-family:'IBM Plex Mono',monospace;font-size:14px;opacity:0.6;line-height:1;
+}
+.song-list li:hover .song-del{opacity:1;}
+
+.lyrics-editor{flex:1;padding:18px;display:flex;flex-direction:column;gap:12px;min-width:0;}
+.lyr-title-row{display:flex;align-items:center;gap:12px;}
+.song-title{
+  flex:1;background:transparent;border:0;border-bottom:1px solid var(--line);
+  color:var(--ink);font-family:'Space Grotesk',sans-serif;
+  font-size:24px;font-weight:700;padding:4px 2px 8px;outline:none;
+}
+.song-title:focus{border-bottom-color:var(--accent);}
+.saved-badge{font-size:12px;color:var(--dim);opacity:0;transition:opacity .3s;}
+.saved-badge.show{opacity:1;color:var(--accent);}
+
+.section-buttons{display:flex;gap:8px;flex-wrap:wrap;}
+.stats{font-size:12px;color:var(--dim);}
+
+.lyrics-area{
+  flex:1;width:100%;min-height:340px;resize:none;
+  background:#0d1017;border:1px solid var(--line);border-radius:12px;
+  color:#e8ecf4;font-family:'IBM Plex Mono',monospace;font-size:15px;line-height:1.75;
+  padding:16px;outline:none;
+}
+.lyrics-area:focus{border-color:var(--accent);}
+.lyr-footer{display:flex;gap:8px;flex-wrap:wrap;}
+
+.foot{
+  border-top:1px solid var(--line);
+  padding:18px;text-align:center;color:var(--dim);font-size:12px;
+}
+
+@media (max-width:760px){
+  .rowlabel{flex:0 0 150px;min-width:150px;}
+  .transport-group.grow{flex:1 1 100%;justify-content:flex-start;}
+  .songlist{flex:0 0 100%;border-right:0;border-bottom:1px solid var(--line);max-height:200px;}
+  .lyrics-layout{flex-direction:column;}
+}
+
+[hidden]{display:none !important;}
+
+/* ---------- auth screen ---------- */
+.auth-screen{
+  position:fixed;inset:0;z-index:100;
+  display:flex;align-items:center;justify-content:center;
+  padding:24px;overflow-y:auto;
+  background:var(--bg);
+  background-image:
+    radial-gradient(circle at 12% 8%, rgba(200,255,0,0.06), transparent 38%),
+    radial-gradient(circle at 88% 92%, rgba(77,200,255,0.07), transparent 40%);
+}
+.auth-card{
+  width:100%;max-width:400px;
+  background:var(--panel);border:1px solid var(--line);border-radius:18px;
+  padding:32px 28px;text-align:center;
+  box-shadow:0 20px 60px rgba(0,0,0,0.5);
+}
+.auth-brand{justify-content:center;margin-bottom:10px;}
+.auth-sub{color:var(--dim);font-size:14px;line-height:1.5;margin:0 0 20px;}
+.auth-tabs{display:flex;gap:6px;background:var(--panel-2);padding:4px;border:1px solid var(--line);border-radius:12px;margin-bottom:16px;}
+.auth-tab{flex:1;border:0;background:transparent;color:var(--dim);font-family:inherit;font-size:14px;font-weight:600;padding:9px;border-radius:9px;cursor:pointer;transition:all .15s;}
+.auth-tab:hover{color:var(--ink);}
+.auth-tab.active{background:var(--accent);color:#0b0d12;}
+.auth-form{display:flex;flex-direction:column;gap:10px;text-align:left;}
+.auth-form input{
+  background:var(--panel-2);border:1px solid var(--line);border-radius:10px;
+  color:var(--ink);font-family:'IBM Plex Mono',monospace;font-size:14px;
+  padding:12px 14px;outline:none;width:100%;
+}
+.auth-form input:focus{border-color:var(--accent);}
+.auth-error{color:var(--danger);font-size:13px;min-height:18px;margin-top:14px;}
+
+/* ---------- user bar ---------- */
+.userbar{display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
+.userbar .user-name{font-weight:600;font-size:14px;}
+.userbar .user-time{font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--accent-2);white-space:nowrap;}
+
+/* ---------- saved beats ---------- */
+.beats-bar{
+  display:flex;align-items:center;gap:10px;flex-wrap:wrap;
+  margin-bottom:14px;padding-top:14px;border-top:1px solid var(--line);
+}
+.beat-select{min-width:180px;flex:1;max-width:260px;}
+</style>
+</head>
+<body>
+
+<!-- AUTH SCREEN -->
+<div id="authScreen" class="auth-screen">
+  <div class="auth-card">
+    <div class="brand auth-brand">
+      <span class="brand-mark">M$</span>
+      <span class="brand-name">mus$icmaker</span>
+    </div>
+    <p class="auth-sub">Make music, write lyrics, and save your beats &amp; songs to your account.</p>
+    <div class="auth-tabs">
+      <button type="button" class="auth-tab active" id="authTabLogin">Log in</button>
+      <button type="button" class="auth-tab" id="authTabSignup">Sign up</button>
+    </div>
+    <form id="loginForm" class="auth-form">
+      <input type="text" id="loginUser" placeholder="Username" autocomplete="username">
+      <input type="password" id="loginPass" placeholder="Password" autocomplete="current-password">
+      <button type="submit" class="btn accent block">Log in</button>
+    </form>
+    <form id="signupForm" class="auth-form" hidden>
+      <input type="text" id="signupUser" placeholder="Username" autocomplete="username">
+      <input type="password" id="signupPass" placeholder="Password" autocomplete="new-password">
+      <input type="password" id="signupPass2" placeholder="Confirm password" autocomplete="new-password">
+      <button type="submit" class="btn accent block">Create account</button>
+    </form>
+    <div id="authError" class="auth-error"></div>
+  </div>
+</div>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <div class="brand">
+      <span class="brand-mark">M$</span>
+      <span class="brand-name">mus$icmaker</span>
+    </div>
+    <nav class="tabs">
+      <button class="tab-btn active" data-tab="studio" id="tabBtnStudio">Studio</button>
+      <button class="tab-btn" data-tab="lyrics" id="tabBtnLyrics">Lyrics</button>
+    </nav>
+    <div class="userbar" id="userbar" hidden>
+      <span class="user-name" id="userName"></span>
+      <span class="user-time" id="userTime">Time on site: 0s</span>
+      <button id="logoutBtn" class="btn mini">Log out</button>
+    </div>
+  </div>
+</header>
+
+<main hidden>
+  <!-- ============ STUDIO ============ -->
+  <section id="tab-studio" class="tab active">
+
+    <div class="panel transport">
+      <div class="transport-group">
+        <button id="playBtn" class="btn play" title="Space bar">&#9654; Play</button>
+        <button id="stopBtn" class="btn stop" title="Stop &amp; reset">&#9632; Stop</button>
+      </div>
+
+      <div class="transport-group bpm-group">
+        <label class="bpm-label" for="bpmSlider">Tempo</label>
+        <input type="range" id="bpmSlider" min="60" max="200" step="1" value="120">
+        <span id="bpmValue" class="mono">120 BPM</span>
+        <button id="tapBtn" class="btn mini">Tap</button>
+      </div>
+
+      <div class="transport-group">
+        <label class="bpm-label" for="rootSel">Key</label>
+        <select id="rootSel"></select>
+        <select id="scaleSel"></select>
+      </div>
+
+      <div class="transport-group grow">
+        <label class="bpm-label" for="masterVol">Master</label>
+        <input type="range" id="masterVol" min="0" max="100" value="80">
+        <span id="masterVolVal" class="mono">80</span>
+      </div>
+    </div>
+
+    <div class="panel grid-panel">
+      <div class="grid-head">
+        <div class="grid-tools">
+          <span class="panel-title">Beat pattern</span>
+          <span class="mono hint">click a cell to toggle it &middot; space = play/stop</span>
+        </div>
+        <div class="grid-actions">
+          <button id="randomBtn" class="btn small">Randomize</button>
+          <button id="clearBtn" class="btn small">Clear</button>
+          <button id="exportBtn" class="btn small accent">Export WAV</button>
+          <select id="exportBars" class="bars-sel" title="Length of exported track">
+            <option value="4">4 bars</option>
+            <option value="8" selected>8 bars</option>
+            <option value="16">16 bars</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="beats-bar">
+        <span class="panel-title">Saved beats</span>
+        <select id="beatSelect" class="beat-select"></select>
+        <button id="saveBeatBtn" class="btn small">Save beat</button>
+        <button id="loadBeatBtn" class="btn small accent">Load</button>
+        <button id="deleteBeatBtn" class="btn small danger">Delete</button>
+      </div>
+
+      <div class="grid-scroll">
+        <div class="colheader">
+          <div class="rowlabel"></div>
+          <div class="steps" id="colHeaderSteps"></div>
+        </div>
+        <div id="gridRows"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ LYRICS ============ -->
+  <section id="tab-lyrics" class="tab">
+
+    <div class="panel lyrics-layout">
+      <aside class="songlist">
+        <div class="panel-title">My songs</div>
+        <button id="newSongBtn" class="btn small accent block">+ New song</button>
+        <ul id="songList" class="song-list"></ul>
+      </aside>
+
+      <div class="lyrics-editor">
+        <div class="lyr-title-row">
+          <input id="songTitle" class="song-title" type="text" placeholder="Song title" autocomplete="off">
+          <span id="savedBadge" class="saved-badge mono">saved</span>
+        </div>
+
+        <div class="section-buttons">
+          <button class="btn small" data-section="Verse">Verse</button>
+          <button class="btn small" data-section="Pre-Chorus">Pre-Chorus</button>
+          <button class="btn small" data-section="Chorus">Chorus</button>
+          <button class="btn small" data-section="Bridge">Bridge</button>
+          <button class="btn small" data-section="Hook">Hook</button>
+          <button class="btn small" data-section="Tag">Tag</button>
+          <button class="btn small" data-section="Outro">Outro</button>
+        </div>
+
+        <div class="stats mono" id="lyrStats">0 words &middot; 0 characters &middot; 1 line</div>
+
+        <textarea id="lyricsArea" class="lyrics-area" placeholder="Write your lyrics here..."></textarea>
+
+        <div class="lyr-footer">
+          <button id="renameBtn" class="btn small">Rename</button>
+          <button id="deleteBtn" class="btn small danger">Delete song</button>
+          <button id="exportTxtBtn" class="btn small accent">Export .txt</button>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="foot" hidden>
+  <span class="mono">mus$icmaker &middot; beats &amp; lyrics save to your account</span>
+</footer>
+
+<script>
+(function () {
+  'use strict';
+
+  const INSTRUMENTS = [
+    { id: 'kick', name: 'Kick', max: 2 },
+    { id: 'snare', name: 'Snare', max: 2 },
+    { id: 'hh', name: 'Hi-Hat', max: 3 },
+    { id: 'clap', name: 'Clap', max: 2 },
+    { id: 'bass', name: 'Bass', max: 2 },
+    { id: 'lead', name: 'Lead', max: 2 }
+  ];
+
+  const NOTES = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+
+  const SCALES = {
+    'Major': [0, 2, 4, 5, 7, 9, 11],
+    'Minor': [0, 2, 3, 5, 7, 8, 10],
+    'Maj Pent': [0, 2, 4, 7, 9],
+    'Min Pent': [0, 3, 5, 7, 10],
+    'Blues': [0, 3, 5, 6, 7, 10],
+    'Dorian': [0, 2, 3, 5, 7, 9, 10]
+  };
+
+  const LS_USERS = 'mus$icmaker_users_v1';
+  const LS_SESSION = 'mus$icmaker_session_v1';
+  const LS_STATE = 'mus$icmaker_state_v1';
+  const LS_SONGS = 'mus$icmaker_songs_v1';
+  const LS_BEATS = 'mus$icmaker_beats_v1';
+
+  const DEFAULTS = {
+    bpm: 120,
+    masterVol: 80,
+    root: 'A',
+    scale: 'Min Pent',
+    volumes: { kick: 80, snare: 75, hh: 60, clap: 70, bass: 70, lead: 65 },
+    muted: { kick: false, snare: false, hh: false, clap: false, bass: false, lead: false },
+    pattern: {
+      kick: [1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0],
+      snare: [0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0],
+      hh: [1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0],
+      clap: [0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0],
+      bass: [1, 0, 0, 1, 0, 0, 1, 0, 1, 0, 0, 1, 0, 0, 0, 1],
+      lead: [1, 0, 1, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 1, 0, 0]
+    }
+  };
+
+  const $ = function (id) { return document.getElementById(id); };
+
+  const playBtn = $('playBtn');
+  const stopBtn = $('stopBtn');
+  const bpmSlider = $('bpmSlider');
+  const bpmValue = $('bpmValue');
+  const tapBtn = $('tapBtn');
+  const rootSel = $('rootSel');
+  const scaleSel = $('scaleSel');
+  const masterVol = $('masterVol');
+  const masterVolVal = $('masterVolVal');
+  const randomBtn = $('randomBtn');
+  const clearBtn = $('clearBtn');
+  const exportBtn = $('exportBtn');
+  const exportBars = $('exportBars');
+  const beatSelect = $('beatSelect');
+  const saveBeatBtn = $('saveBeatBtn');
+  const loadBeatBtn = $('loadBeatBtn');
+  const deleteBeatBtn = $('deleteBeatBtn');
+
+  const lyricsArea = $('lyricsArea');
+  const songTitle = $('songTitle');
+  const songList = $('songList');
+  const savedBadge = $('savedBadge');
+
+  const authScreen = $('authScreen');
+  const mainEl = document.querySelector('main');
+  const footerEl = document.querySelector('footer');
+  const userbar = $('userbar');
+  const userNameEl = $('userName');
+  const userTimeEl = $('userTime');
+  const authTabLogin = $('authTabLogin');
+  const authTabSignup = $('authTabSignup');
+  const loginForm = $('loginForm');
+  const signupForm = $('signupForm');
+  const authErrorEl = $('authError');
+  const loginUser = $('loginUser');
+  const loginPass = $('loginPass');
+  const signupUser = $('signupUser');
+  const signupPass = $('signupPass');
+  const signupPass2 = $('signupPass2');
+
+  let state = clone(DEFAULTS);
+  let ac = null;
+  let online = null;
+  let isPlaying = false;
+  let step = 0;
+  let nextTime = 0;
+  let timer = null;
+  let leadIndex = 0;
+  let taps = [];
+  let songs = [];
+  let currentSongId = null;
+  let beats = [];
+  let users = [];
+  let authUser = null;
+  let sessionSince = 0;
+  let timeTimer = null;
+  let persistTimer = null;
+  let saveTimer = null;
+  let selectsPopulated = false;
+  let studioWired = false;
+
+  /* ===================== HELPERS / STORAGE ===================== */
+
+  function clone(obj) { return JSON.parse(JSON.stringify(obj)); }
+
+  function stateKey() { return LS_STATE + '_' + authUser; }
+  function songsKey() { return LS_SONGS + '_' + authUser; }
+  function beatsKey() { return LS_BEATS + '_' + authUser; }
+
+  function loadState(user) {
+    try {
+      const raw = localStorage.getItem(LS_STATE + '_' + user);
+      if (!raw) return clone(DEFAULTS);
+      const s = JSON.parse(raw);
+      const merged = Object.assign(clone(DEFAULTS), s);
+      merged.pattern = Object.assign(clone(DEFAULTS.pattern), s.pattern || {});
+      for (const inst of INSTRUMENTS) {
+        merged.volumes[inst.id] = (s.volumes && s.volumes[inst.id] != null) ? s.volumes[inst.id] : DEFAULTS.volumes[inst.id];
+        merged.muted[inst.id] = (s.muted && s.muted[inst.id] != null) ? s.muted[inst.id] : false;
+        if (!merged.pattern[inst.id] || merged.pattern[inst.id].length !== 16) {
+          merged.pattern[inst.id] = DEFAULTS.pattern[inst.id].slice();
+        }
+      }
+      return merged;
+    } catch (e) {
+      return clone(DEFAULTS);
+    }
+  }
+
+  function saveState() {
+    if (!authUser) return;
+    try { localStorage.setItem(stateKey(), JSON.stringify(state)); } catch (e) {}
+  }
+
+  /* ===================== AUDIO ENGINE ===================== */
+
+  function noteToMidi(name, octave) { return (octave + 1) * 12 + NOTES.indexOf(name); }
+  function midiToFreq(m) { return 440 * Math.pow(2, (m - 69) / 12); }
+  function bassMidi() { return noteToMidi(state.root, 2); }
+  function leadBaseMidi() { return noteToMidi(state.root, 3) + 12; }
+  function leadSeqMidi() {
+    const scale = SCALES[state.scale] || SCALES['Min Pent'];
+    const m = scale[leadIndex % scale.length] + leadBaseMidi();
+    leadIndex++;
+    return m;
+  }
+
+  function makeNoise(actx) {
+    if (actx.__noise) return actx.__noise;
+    const len = Math.floor(actx.sampleRate);
+    const buf = actx.createBuffer(1, len, actx.sampleRate);
+    const d = buf.getChannelData(0);
+    for (let i = 0; i < len; i++) d[i] = Math.random() * 2 - 1;
+    actx.__noise = buf;
+    return buf;
+  }
+
+  function playKick(actx, t, dest) {
+    const o = actx.createOscillator();
+    const g = actx.createGain();
+    o.frequency.setValueAtTime(160, t);
+    o.frequency.exponentialRampToValueAtTime(42, t + 0.12);
+    g.gain.setValueAtTime(1, t);
+    g.gain.exponentialRampToValueAtTime(0.001, t + 0.28);
+    o.connect(g); g.connect(dest);
+    o.start(t); o.stop(t + 0.3);
+  }
+
+  function playSnare(actx, t, dest) {
+    const o = actx.createOscillator();
+    const og = actx.createGain();
+    o.type = 'triangle';
+    o.frequency.value = 200;
+    og.gain.setValueAtTime(0.5, t);
+    og.gain.exponentialRampToValueAtTime(0.001, t + 0.12);
+    o.connect(og); og.connect(dest);
+    o.start(t); o.stop(t + 0.15);
+
+    const s = actx.createBufferSource();
+    s.buffer = makeNoise(actx);
+    const hp = actx.createBiquadFilter();
+    hp.type = 'highpass'; hp.frequency.value = 1400;
+    const ng = actx.createGain();
+    ng.gain.setValueAtTime(0.8, t);
+    ng.gain.exponentialRampToValueAtTime(0.001, t + 0.14);
+    s.connect(hp); hp.connect(ng); ng.connect(dest);
+    s.start(t); s.stop(t + 0.2);
+  }
+
+  function playHat(actx, t, dest, open) {
+    const s = actx.createBufferSource();
+    s.buffer = makeNoise(actx);
+    const hp = actx.createBiquadFilter();
+    hp.type = 'highpass';
+    hp.frequency.value = open ? 6000 : 8000;
+    const g = actx.createGain();
+    const decay = open ? 0.35 : 0.06;
+    g.gain.setValueAtTime(open ? 0.35 : 0.25, t);
+    g.gain.exponentialRampToValueAtTime(0.001, t + decay);
+    s.connect(hp); hp.connect(g); g.connect(dest);
+    s.start(t); s.stop(t + decay + 0.05);
+  }
+
+  function playClap(actx, t, dest) {
+    for (let i = 0; i < 3; i++) {
+      const bt = t + i * 0.012;
+      const s = actx.createBufferSource();
+      s.buffer = makeNoise(actx);
+      const bp = actx.createBiquadFilter();
+      bp.type = 'bandpass'; bp.frequency.value = 1200; bp.Q.value = 1.5;
+      const g = actx.createGain();
+      g.gain.setValueAtTime(0.5, bt);
+      g.gain.exponentialRampToValueAtTime(0.001, bt + 0.03);
+      s.connect(bp); bp.connect(g); g.connect(dest);
+      s.start(bt); s.stop(bt + 0.05);
+    }
+    const s = actx.createBufferSource();
+    s.buffer = makeNoise(actx);
+    const bp = actx.createBiquadFilter();
+    bp.type = 'bandpass'; bp.frequency.value = 1200; bp.Q.value = 1.5;
+    const g = actx.createGain();
+    g.gain.setValueAtTime(0.6, t + 0.036);
+    g.gain.exponentialRampToValueAtTime(0.001, t + 0.25);
+    s.connect(bp); bp.connect(g); g.connect(dest);
+    s.start(t + 0.036); s.stop(t + 0.3);
+  }
+
+  function playBass(actx, t, dest) {
+    const f = midiToFreq(bassMidi());
+    const o = actx.createOscillator();
+    const o2 = actx.createOscillator();
+    o.type = 'sawtooth'; o2.type = 'square';
+    o.frequency.value = f; o2.frequency.value = f;
+    const g = actx.createGain();
+    g.gain.setValueAtTime(0.3, t);
+    g.gain.exponentialRampToValueAtTime(0.001, t + 0.22);
+    const lp = actx.createBiquadFilter();
+    lp.type = 'lowpass'; lp.frequency.value = 600;
+    o.connect(g); o2.connect(g); g.connect(lp); lp.connect(dest);
+    o.start(t); o2.start(t); o.stop(t + 0.25); o2.stop(t + 0.25);
+  }
+
+  function playLead(actx, t, dest) {
+    const f = midiToFreq(leadSeqMidi());
+    const o = actx.createOscillator();
+    const o2 = actx.createOscillator();
+    o.type = 'triangle'; o2.type = 'sine';
+    o.frequency.value = f; o2.frequency.value = f * 2;
+    const g = actx.createGain();
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.linearRampToValueAtTime(0.22, t + 0.02);
+    g.gain.setValueAtTime(0.22, t + 0.16);
+    g.gain.exponentialRampToValueAtTime(0.001, t + 0.24);
+    const lp = actx.createBiquadFilter();
+    lp.type = 'lowpass'; lp.frequency.value = 2200;
+    o.connect(lp); o2.connect(lp); lp.connect(g); g.connect(dest);
+    o.start(t); o2.start(t); o.stop(t + 0.26); o2.stop(t + 0.26);
+  }
+
+  function volumeFor(id) {
+    if (state.muted[id]) return 0;
+    return Math.pow(state.volumes[id] / 100, 1.4) * 0.85;
+  }
+
+  function createDestinations(actx) {
+    const master = actx.createGain();
+    master.gain.value = Math.pow(state.masterVol / 100, 1.4);
+    const per = {};
+    for (const inst of INSTRUMENTS) {
+      const g = actx.createGain();
+      g.gain.value = volumeFor(inst.id);
+      g.connect(master);
+      per[inst.id] = g;
+    }
+    return { master: master, per: per };
+  }
+
+  function scheduleStep(s, t, actx, dests) {
+    for (const inst of INSTRUMENTS) {
+      const v = state.pattern[inst.id][s];
+      if (!v) continue;
+      const dest = dests.per[inst.id];
+      if (inst.id === 'kick') playKick(actx, t, dest);
+      else if (inst.id === 'snare') playSnare(actx, t, dest);
+      else if (inst.id === 'hh') playHat(actx, t, dest, v === 2);
+      else if (inst.id === 'clap') playClap(actx, t, dest);
+      else if (inst.id === 'bass') playBass(actx, t, dest);
+      else if (inst.id === 'lead') playLead(actx, t, dest);
+    }
+  }
+
+  function scheduler() {
+    while (nextTime < ac.currentTime + 0.1) {
+      scheduleStep(step, nextTime, ac, online);
+      nextTime += 60 / state.bpm / 4;
+      updatePlayhead(step);
+      step = (step + 1) % 16;
+    }
+    timer = setTimeout(scheduler, 25);
+  }
+
+  function updatePlayhead(i) {
+    document.querySelectorAll('.cell.playing').forEach(function (c) { c.classList.remove('playing'); });
+    document.querySelectorAll('.colhead-step.playing').forEach(function (c) { c.classList.remove('playing'); });
+    document.querySelectorAll('[data-step="' + i + '"]').forEach(function (c) { c.classList.add('playing'); });
+  }
+
+  async function play() {
+    if (isPlaying) return;
+    if (!ac) {
+      ac = new (window.AudioContext || window.webkitAudioContext)();
+      online = createDestinations(ac);
+      online.master.connect(ac.destination);
+    }
+    if (ac.state === 'suspended') await ac.resume();
+    isPlaying = true;
+    step = 0;
+    leadIndex = 0;
+    nextTime = ac.currentTime + 0.05;
+    playBtn.innerHTML = '&#10074;&#10074; Pause';
+    scheduler();
+  }
+
+  function stop() {
+    isPlaying = false;
+    if (timer) { clearTimeout(timer); timer = null; }
+    playBtn.innerHTML = '&#9654; Play';
+    document.querySelectorAll('.cell.playing').forEach(function (c) { c.classList.remove('playing'); });
+    document.querySelectorAll('.colhead-step.playing').forEach(function (c) { c.classList.remove('playing'); });
+    step = 0;
+  }
+
+  function encodeWAV(buffer, sr) {
+    const n = buffer.length;
+    const ab = new ArrayBuffer(44 + n * 2);
+    const v = new DataView(ab);
+    const ws = function (o, s) { for (let i = 0; i < s.length; i++) v.setUint8(o + i, s.charCodeAt(i)); };
+    ws(0, 'RIFF'); v.setUint32(4, 36 + n * 2, true); ws(8, 'WAVE');
+    ws(12, 'fmt '); v.setUint32(16, 16, true); v.setUint16(20, 1, true);
+    v.setUint16(22, 1, true); v.setUint32(24, sr, true); v.setUint32(28, sr * 2, true);
+    v.setUint16(32, 2, true); v.setUint16(34, 16, true);
+    ws(36, 'data'); v.setUint32(40, n * 2, true);
+    const d = buffer.getChannelData(0);
+    let o = 44;
+    for (let i = 0; i < n; i++) {
+      const s = Math.max(-1, Math.min(1, d[i]));
+      v.setInt16(o, s < 0 ? s * 0x8000 : s * 0x7FFF, true);
+      o += 2;
+    }
+    return new Blob([ab], { type: 'audio/wav' });
+  }
+
+  async function exportWAV() {
+    const bars = parseInt(exportBars.value, 10);
+    const total = bars * 16;
+    const sr = 44100;
+    const dur = total * (60 / state.bpm / 4);
+    const off = new OfflineAudioContext(1, Math.ceil(sr * dur), sr);
+    const dests = createDestinations(off);
+    dests.master.connect(off.destination);
+    leadIndex = 0;
+    for (let s = 0; s < total; s++) {
+      scheduleStep(s, s * (60 / state.bpm / 4), off, dests);
+    }
+    const rendered = await off.startRendering();
+    const blob = encodeWAV(rendered, sr);
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'mus$icmaker-beat.wav';
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(function () { URL.revokeObjectURL(a.href); }, 4000);
+  }
+
+  /* ===================== GRID UI ===================== */
+
+  function renderCell(id, i, el) {
+    const v = state.pattern[id][i];
+    el.classList.toggle('on', v > 0);
+    el.classList.toggle('strong', v >= 2);
+  }
+
+  function renderGrid() {
+    for (const inst of INSTRUMENTS) {
+      const steps = document.querySelector('.row[data-inst="' + inst.id + '"] .steps');
+      if (steps) steps.querySelectorAll('.cell').forEach(function (c, i) { renderCell(inst.id, i, c); });
+    }
+  }
+
+  function toggleCell(id, i, el) {
+    const inst = INSTRUMENTS.find(function (x) { return x.id === id; });
+    state.pattern[id][i] = (state.pattern[id][i] + 1) % inst.max;
+    renderCell(id, i, el);
+    saveState();
+  }
+
+  function buildGrid() {
+    const header = $('colHeaderSteps');
+    header.innerHTML = '';
+    for (let i = 0; i < 16; i++) {
+      const d = document.createElement('div');
+      d.className = 'colhead-step' + (i % 4 === 0 ? ' bar' : '');
+      d.dataset.step = i;
+      d.textContent = Math.floor(i / 4) + 1;
+      header.appendChild(d);
+    }
+
+    const rows = $('gridRows');
+    rows.innerHTML = '';
+    for (const inst of INSTRUMENTS) {
+      const row = document.createElement('div');
+      row.className = 'row';
+      row.dataset.inst = inst.id;
+
+      const label = document.createElement('div');
+      label.className = 'rowlabel';
+      const name = document.createElement('span');
+      name.className = 'iname';
+      name.textContent = inst.name;
+      const mute = document.createElement('button');
+      mute.className = 'mute-btn' + (state.muted[inst.id] ? '' : ' on');
+      mute.textContent = 'M';
+      mute.title = 'Mute';
+      mute.addEventListener('click', function () {
+        state.muted[inst.id] = !state.muted[inst.id];
+        mute.classList.toggle('on', !state.muted[inst.id]);
+        row.classList.toggle('muted', state.muted[inst.id]);
+        if (online) online.per[inst.id].gain.value = volumeFor(inst.id);
+        saveState();
+      });
+      if (state.muted[inst.id]) row.classList.add('muted');
+      const vol = document.createElement('input');
+      vol.type = 'range';
+      vol.min = 0; vol.max = 100;
+      vol.value = state.volumes[inst.id];
+      vol.title = inst.name + ' volume';
+      vol.addEventListener('input', function () {
+        state.volumes[inst.id] = parseInt(vol.value, 10);
+        if (online) online.per[inst.id].gain.value = volumeFor(inst.id);
+        saveState();
+      });
+      label.appendChild(name);
+      label.appendChild(mute);
+      label.appendChild(vol);
+
+      const steps = document.createElement('div');
+      steps.className = 'steps';
+      for (let i = 0; i < 16; i++) {
+        const c = document.createElement('button');
+        c.className = 'cell';
+        c.dataset.step = i;
+        c.addEventListener('click', function () { toggleCell(inst.id, i, c); });
+        steps.appendChild(c);
+      }
+      row.appendChild(label);
+      row.appendChild(steps);
+      rows.appendChild(row);
+    }
+    renderGrid();
+  }
+
+  function randomize() {
+    const density = { kick: 0.28, snare: 0.2, hh: 0.5, clap: 0.12, bass: 0.3, lead: 0.25 };
+    for (const inst of INSTRUMENTS) {
+      for (let i = 0; i < 16; i++) {
+        if (Math.random() < density[inst.id]) {
+          state.pattern[inst.id][i] = (inst.id === 'hh' && Math.random() < 0.25) ? 2 : 1;
+        } else {
+          state.pattern[inst.id][i] = 0;
+        }
+      }
+    }
+    renderGrid();
+    saveState();
+  }
+
+  function clearPattern() {
+    for (const inst of INSTRUMENTS) {
+      for (let i = 0; i < 16; i++) state.pattern[inst.id][i] = 0;
+    }
+    renderGrid();
+    saveState();
+  }
+
+  function setBpm(b) {
+    state.bpm = b;
+    bpmSlider.value = b;
+    bpmValue.textContent = b + ' BPM';
+    saveState();
+  }
+
+  function populateStudioControls() {
+    if (selectsPopulated) return;
+    selectsPopulated = true;
+    NOTES.forEach(function (n) {
+      const o = document.createElement('option');
+      o.value = n; o.textContent = n;
+      rootSel.appendChild(o);
+    });
+    Object.keys(SCALES).forEach(function (s) {
+      const o = document.createElement('option');
+      o.value = s; o.textContent = s;
+      scaleSel.appendChild(o);
+    });
+  }
+
+  function applyControlsFromState() {
+    bpmSlider.value = state.bpm;
+    bpmValue.textContent = state.bpm + ' BPM';
+    rootSel.value = state.root;
+    scaleSel.value = state.scale;
+    masterVol.value = state.masterVol;
+    masterVolVal.textContent = state.masterVol;
+  }
+
+  function wireStudio() {
+    if (studioWired) return;
+    studioWired = true;
+
+    playBtn.addEventListener('click', play);
+    stopBtn.addEventListener('click', stop);
+    bpmSlider.addEventListener('input', function () { setBpm(parseInt(bpmSlider.value, 10)); });
+    rootSel.addEventListener('change', function () { state.root = rootSel.value; saveState(); });
+    scaleSel.addEventListener('change', function () { state.scale = scaleSel.value; saveState(); });
+    masterVol.addEventListener('input', function () {
+      state.masterVol = parseInt(masterVol.value, 10);
+      masterVolVal.textContent = state.masterVol;
+      if (online) online.master.gain.value = Math.pow(state.masterVol / 100, 1.4);
+      saveState();
+    });
+    tapBtn.addEventListener('click', function () {
+      const now = performance.now();
+      taps.push(now);
+      if (taps.length > 1 && now - taps[taps.length - 2] > 2000) taps = [now];
+      if (taps.length >= 2) {
+        const avg = (taps[taps.length - 1] - taps[0]) / (taps.length - 1);
+        if (avg > 0) setBpm(Math.round(Math.max(60, Math.min(200, 60000 / avg))));
+      }
+    });
+    randomBtn.addEventListener('click', randomize);
+    clearBtn.addEventListener('click', function () {
+      if (confirm('Clear the whole pattern?')) clearPattern();
+    });
+    exportBtn.addEventListener('click', async function () {
+      exportBtn.disabled = true;
+      exportBtn.textContent = 'Rendering\u2026';
+      try {
+        await exportWAV();
+      } catch (e) {
+        alert('Export failed: ' + e.message);
+      }
+      exportBtn.textContent = 'Export WAV';
+      exportBtn.disabled = false;
+    });
+
+    saveBeatBtn.addEventListener('click', saveBeatPrompt);
+    loadBeatBtn.addEventListener('click', loadSelectedBeat);
+    deleteBeatBtn.addEventListener('click', deleteSelectedBeat);
+  }
+
+  /* ===================== SAVED BEATS ===================== */
+
+  function loadBeats() {
+    if (!authUser) { beats = []; return; }
+    try {
+      const raw = localStorage.getItem(beatsKey());
+      beats = raw ? JSON.parse(raw) : [];
+    } catch (e) { beats = []; }
+    if (!Array.isArray(beats)) beats = [];
+  }
+
+  function saveBeats() {
+    if (!authUser) return;
+    try { localStorage.setItem(beatsKey(), JSON.stringify(beats)); } catch (e) {}
+  }
+
+  function repopulateBeatSelect() {
+    beatSelect.innerHTML = '';
+    const ph = document.createElement('option');
+    ph.value = '';
+    ph.textContent = '\u2014 saved beats \u2014';
+    beatSelect.appendChild(ph);
+    beats.forEach(function (b) {
+      const o = document.createElement('option');
+      o.value = b.id;
+      o.textContent = b.name;
+      beatSelect.appendChild(o);
+    });
+    beatSelect.value = '';
+  }
+
+  function saveBeatPrompt() {
+    const name = prompt('Name this beat:', 'My Beat');
+    if (!name || !name.trim()) return;
+    const trimmed = name.trim();
+    const existing = beats.find(function (b) { return b.name === trimmed; });
+    if (existing) {
+      existing.pattern = clone(state.pattern);
+      existing.bpm = state.bpm;
+      existing.root = state.root;
+      existing.scale = state.scale;
+      existing.savedAt = Date.now();
+    } else {
+      beats.push({
+        id: Date.now(),
+        name: trimmed,
+        pattern: clone(state.pattern),
+        bpm: state.bpm,
+        root: state.root,
+        scale: state.scale,
+        savedAt: Date.now()
+      });
+    }
+    saveBeats();
+    repopulateBeatSelect();
+    const id = existing ? existing.id : beats[beats.length - 1].id;
+    beatSelect.value = String(id);
+  }
+
+  function loadSelectedBeat() {
+    const id = parseInt(beatSelect.value, 10);
+    if (!id) return;
+    const b = beats.find(function (x) { return x.id === id; });
+    if (!b) return;
+    state.pattern = clone(b.pattern);
+    state.bpm = b.bpm;
+    state.root = b.root;
+    state.scale = b.scale;
+    renderGrid();
+    applyControlsFromState();
+    saveState();
+  }
+
+  function deleteSelectedBeat() {
+    const id = parseInt(beatSelect.value, 10);
+    if (!id) return;
+    const b = beats.find(function (x) { return x.id === id; });
+    if (!b) return;
+    if (!confirm('Delete beat "' + b.name + '"?')) return;
+    beats = beats.filter(function (x) { return x.id !== id; });
+    saveBeats();
+    repopulateBeatSelect();
+  }
+
+  /* ===================== LYRICS ===================== */
+
+  function loadSongs() {
+    if (!authUser) { songs = []; return; }
+    try {
+      const raw = localStorage.getItem(songsKey());
+      songs = raw ? JSON.parse(raw) : [];
+    } catch (e) { songs = []; }
+    if (!Array.isArray(songs)) songs = [];
+    if (!songs.length) songs = [{ id: Date.now(), title: 'My First Song', text: '' }];
+    if (!songs.some(function (s) { return s.id === currentSongId; })) currentSongId = songs[0].id;
+  }
+
+  function saveSongs() {
+    if (!authUser) return;
+    try { localStorage.setItem(songsKey(), JSON.stringify(songs)); } catch (e) {}
+  }
+
+  function currentSong() {
+    return songs.find(function (s) { return s.id === currentSongId; });
+  }
+
+  function flashSaved() {
+    savedBadge.classList.add('show');
+    clearTimeout(saveTimer);
+    saveTimer = setTimeout(function () { savedBadge.classList.remove('show'); }, 1600);
+  }
+
+  function updateStats() {
+    const text = lyricsArea.value;
+    const words = text.trim() ? text.trim().split(/\s+/).length : 0;
+    const chars = text.length;
+    const lines = text ? text.split('\n').length : 1;
+    $('lyrStats').textContent = words + ' words \u00B7 ' + chars + ' characters \u00B7 ' + lines + ' lines';
+  }
+
+  function renderSongList() {
+    songList.innerHTML = '';
+    songs.forEach(function (song) {
+      const li = document.createElement('li');
+      if (song.id === currentSongId) li.classList.add('active');
+      const span = document.createElement('span');
+      span.className = 'song-title-mini';
+      span.textContent = song.title || 'Untitled';
+      span.title = song.title || 'Untitled';
+      const del = document.createElement('button');
+      del.className = 'song-del';
+      del.textContent = '\u00D7';
+      del.title = 'Delete';
+      del.addEventListener('click', function (e) {
+        e.stopPropagation();
+        if (confirm('Delete "' + (song.title || 'Untitled') + '"?')) {
+          songs = songs.filter(function (s) { return s.id !== song.id; });
+          if (!songs.length) {
+            songs = [{ id: Date.now(), title: 'My First Song', text: '' }];
+          }
+          if (currentSongId === song.id) currentSongId = songs[0].id;
+          saveSongs();
+          loadSongIntoEditor();
+          renderSongList();
+        }
+      });
+      li.appendChild(span);
+      li.appendChild(del);
+      li.addEventListener('click', function () {
+        currentSongId = song.id;
+        saveSongs();
+        loadSongIntoEditor();
+        renderSongList();
+      });
+      songList.appendChild(li);
+    });
+  }
+
+  function loadSongIntoEditor() {
+    const song = currentSong();
+    if (!song) return;
+    songTitle.value = song.title || '';
+    lyricsArea.value = song.text || '';
+    updateStats();
+  }
+
+  function persistCurrent() {
+    const song = currentSong();
+    if (!song) return;
+    song.title = songTitle.value || 'Untitled';
+    song.text = lyricsArea.value;
+    saveSongs();
+    flashSaved();
+  }
+
+  function refreshLyricsUI() {
+    renderSongList();
+    loadSongIntoEditor();
+  }
+
+  function initLyrics() {
+    document.querySelectorAll('.section-buttons .btn').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        const label = btn.dataset.section;
+        const start = lyricsArea.selectionStart;
+        const end = lyricsArea.selectionEnd;
+        const before = lyricsArea.value.slice(0, start);
+        const after = lyricsArea.value.slice(end);
+        const insert = '\n[' + label + ']\n\n';
+        lyricsArea.value = before + insert + after;
+        const caret = start + insert.length;
+        lyricsArea.focus();
+        lyricsArea.setSelectionRange(caret, caret);
+        updateStats();
+        persistCurrent();
+      });
+    });
+
+    $('newSongBtn').addEventListener('click', function () {
+      songs.push({ id: Date.now(), title: 'Song ' + (songs.length + 1), text: '' });
+      currentSongId = songs[songs.length - 1].id;
+      saveSongs();
+      loadSongIntoEditor();
+      renderSongList();
+      songTitle.focus();
+    });
+
+    songTitle.addEventListener('input', function () { persistCurrent(); renderSongList(); });
+    lyricsArea.addEventListener('input', function () { updateStats(); persistCurrent(); });
+
+    $('renameBtn').addEventListener('click', function () {
+      const song = currentSong();
+      if (!song) return;
+      const name = prompt('Rename song:', song.title || 'Untitled');
+      if (name && name.trim()) {
+        song.title = name.trim();
+        songTitle.value = song.title;
+        saveSongs();
+        renderSongList();
+        flashSaved();
+      }
+    });
+
+    $('deleteBtn').addEventListener('click', function () {
+      const song = currentSong();
+      if (!song) return;
+      if (confirm('Delete "' + (song.title || 'Untitled') + '"?')) {
+        songs = songs.filter(function (s) { return s.id !== song.id; });
+        if (!songs.length) songs = [{ id: Date.now(), title: 'My First Song', text: '' }];
+        if (currentSongId !== song.id) currentSongId = songs[0].id;
+        saveSongs();
+        loadSongIntoEditor();
+        renderSongList();
+      }
+    });
+
+    $('exportTxtBtn').addEventListener('click', function () {
+      const song = currentSong();
+      if (!song) return;
+      const body = song.title + '\n\n' + (song.text || '');
+      const blob = new Blob([body], { type: 'text/plain;charset=utf-8' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = (song.title || 'song').replace(/[^a-z0-9 _-]+/gi, '') + '.txt';
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(function () { URL.revokeObjectURL(a.href); }, 4000);
+    });
+  }
+
+  /* ===================== ACCOUNTS + TIME ===================== */
+
+  function loadUsers() {
+    try { users = JSON.parse(localStorage.getItem(LS_USERS)) || []; } catch (e) { users = []; }
+    if (!Array.isArray(users)) users = [];
+  }
+
+  function saveUsers() {
+    try { localStorage.setItem(LS_USERS, JSON.stringify(users)); } catch (e) {}
+  }
+
+  function findUser(name) {
+    return users.find(function (u) { return u.u === name; });
+  }
+
+  function makeSalt() { return Math.random().toString(36).slice(2) + Date.now().toString(36); }
+
+  function hashStr(str) {
+    let h = 5381;
+    for (let i = 0; i < str.length; i++) h = ((h * 33) ^ str.charCodeAt(i)) >>> 0;
+    return h.toString(16);
+  }
+
+  function hashPassword(salt, pass) { return hashStr(salt + ':' + pass); }
+
+  function formatTime(ms) {
+    const s = Math.floor(ms / 1000);
+    const h = Math.floor(s / 3600);
+    const m = Math.floor((s % 3600) / 60);
+    const sec = s % 60;
+    if (h > 0) return h + 'h ' + m + 'm ' + sec + 's';
+    if (m > 0) return m + 'm ' + sec + 's';
+    return sec + 's';
+  }
+
+  function getTotalMs() {
+    const u = findUser(authUser);
+    return u ? u.ms + (Date.now() - sessionSince) : 0;
+  }
+
+  function updateTimeDisplay() {
+    userTimeEl.textContent = 'Time on site: ' + formatTime(getTotalMs());
+  }
+
+  function persistElapsed() {
+    const u = findUser(authUser);
+    if (!u) return;
+    const now = Date.now();
+    u.ms += now - sessionSince;
+    sessionSince = now;
+    saveUsers();
+    try { localStorage.setItem(LS_SESSION, JSON.stringify({ u: authUser, since: sessionSince })); } catch (e) {}
+  }
+
+  function startTimers() {
+    updateTimeDisplay();
+    clearInterval(timeTimer);
+    clearInterval(persistTimer);
+    timeTimer = setInterval(updateTimeDisplay, 1000);
+    persistTimer = setInterval(persistElapsed, 5000);
+  }
+
+  function stopTimers() {
+    clearInterval(timeTimer);
+    clearInterval(persistTimer);
+    timeTimer = null;
+    persistTimer = null;
+  }
+
+  function showApp() {
+    authScreen.style.display = 'none';
+    mainEl.removeAttribute('hidden');
+    footerEl.removeAttribute('hidden');
+    userbar.removeAttribute('hidden');
+  }
+
+  function showAuth() {
+    authScreen.style.display = 'flex';
+    mainEl.setAttribute('hidden', '');
+    footerEl.setAttribute('hidden', '');
+    userbar.setAttribute('hidden', '');
+    loginForm.reset();
+    signupForm.reset();
+    setAuthError('');
+  }
+
+  function loadUserWorkspace() {
+    state = loadState(authUser);
+    buildGrid();
+    applyControlsFromState();
+    loadSongs();
+    refreshLyricsUI();
+    loadBeats();
+    repopulateBeatSelect();
+  }
+
+  function startSession(name, since) {
+    authUser = name;
+    sessionSince = since || Date.now();
+    try { localStorage.setItem(LS_SESSION, JSON.stringify({ u: name, since: sessionSince })); } catch (e) {}
+    userNameEl.textContent = name;
+    loadUserWorkspace();
+    showApp();
+    startTimers();
+  }
+
+  function logout() {
+    persistElapsed();
+    stop();
+    authUser = null;
+    try { localStorage.removeItem(LS_SESSION); } catch (e) {}
+    stopTimers();
+    showAuth();
+  }
+
+  function setAuthError(msg) { authErrorEl.textContent = msg; }
+
+  function tryRestoreSession() {
+    try {
+      const s = JSON.parse(localStorage.getItem(LS_SESSION));
+      if (s && s.u && findUser(s.u)) { startSession(s.u, s.since || Date.now()); return true; }
+    } catch (e) {}
+    return false;
+  }
+
+  function initAuth() {
+    loadUsers();
+
+    authTabLogin.addEventListener('click', function () {
+      authTabLogin.classList.add('active');
+      authTabSignup.classList.remove('active');
+      loginForm.hidden = false;
+      signupForm.hidden = true;
+      setAuthError('');
+    });
+    authTabSignup.addEventListener('click', function () {
+      authTabSignup.classList.add('active');
+      authTabLogin.classList.remove('active');
+      loginForm.hidden = true;
+      signupForm.hidden = false;
+      setAuthError('');
+    });
+
+    loginForm.addEventListener('submit', function (e) {
+      e.preventDefault();
+      const n = loginUser.value.trim();
+      const p = loginPass.value;
+      if (!n || !p) { setAuthError('Enter your username and password.'); return; }
+      const u = findUser(n);
+      if (!u || u.h !== hashPassword(u.s, p)) { setAuthError('Incorrect username or password.'); return; }
+      loginForm.reset();
+      startSession(n);
+    });
+
+    signupForm.addEventListener('submit', function (e) {
+      e.preventDefault();
+      const n = signupUser.value.trim();
+      const p = signupPass.value;
+      const p2 = signupPass2.value;
+      if (!/^[A-Za-z0-9_]{3,20}$/.test(n)) { setAuthError('Username must be 3\u201320 characters: letters, numbers, or underscores.'); return; }
+      if (findUser(n)) { setAuthError('That username is already taken.'); return; }
+      if (p.length < 4) { setAuthError('Password must be at least 4 characters.'); return; }
+      if (p !== p2) { setAuthError('Passwords do not match.'); return; }
+      const salt = makeSalt();
+      users.push({ u: n, s: salt, h: hashPassword(salt, p), ms: 0 });
+      saveUsers();
+      signupForm.reset();
+      startSession(n);
+    });
+
+    $('logoutBtn').addEventListener('click', logout);
+
+    if (!tryRestoreSession()) showAuth();
+  }
+
+  /* ===================== TABS + KEYBOARD ===================== */
+
+  function initTabs() {
+    document.querySelectorAll('.tab-btn').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        document.querySelectorAll('.tab-btn').forEach(function (b) { b.classList.remove('active'); });
+        document.querySelectorAll('.tab').forEach(function (t) { t.classList.remove('active'); });
+        btn.classList.add('active');
+        $('tab-' + btn.dataset.tab).classList.add('active');
+      });
+    });
+  }
+
+  document.addEventListener('keydown', function (e) {
+    if (e.code === 'Space') {
+      const tag = document.activeElement ? document.activeElement.tagName : '';
+      if (tag === 'TEXTAREA' || tag === 'INPUT' || tag === 'SELECT' || tag === 'BUTTON') return;
+      if (!authUser) return;
+      e.preventDefault();
+      if (isPlaying) stop(); else play();
+    }
+  });
+
+  window.addEventListener('beforeunload', function () {
+    saveState();
+    if (authUser) persistCurrent();
+    if (authUser) persistElapsed();
+  });
+
+  /* ===================== INIT ===================== */
+
+  populateStudioControls();
+  wireStudio();
+  initLyrics();
+  initTabs();
+  initAuth();
+})();
+</script>
+</body>
+</html>
+
